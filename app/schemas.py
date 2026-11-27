@@ -23,7 +23,7 @@ class TaskUpdate(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=250)
     description: str | None = None
     is_completed: bool | None = None
-    priority: str | None = None
+    priority: PriorityEnum | None = None
     due_date: datetime | None = None
 
 class TaskPublic(TaskBase):

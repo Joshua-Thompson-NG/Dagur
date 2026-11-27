@@ -1,21 +1,22 @@
 # Dagur
 
-**Dagur** (Old Norse / Icelandic for *"Day"*) is a personal morning briefing and task management API built with **FastAPI** and **SQLite**. It aggregates your pending tasks, scrapes or fetches current weather forecasts, and delivers a curated morning digest email right to your inbox at 7:00 AM.
+**Dagur** (Old Norse / Icelandic for *"Day"*) is a personal morning briefing and task management API built with **FastAPI** and **SQLite**. It aggregates your pending tasks, fetches daily weather forecasts and an uplifting scripture passage, renders an HTML email digest using **Jinja2**, and delivers it to your inbox on schedule.
 
 ---
 
 ## Features
 
-- **Task Management**: RESTful endpoints to create, list, complete, and delete personal tasks stored in a local SQLite database.
-- **Weather Fetcher / Scraper**: Service to gather current temperatures, conditions, and daily forecasts.
-- **Morning Digest Engine**: Assembles pending to-dos, weather forecasts, and custom morning insights into a clean email format.
-- **Email Delivery Service**: Configurable SMTP email client to dispatch the digest.
-- **Cron Automation**: Lightweight script / endpoint designed to run via scheduled cron jobs (e.g., every morning at 7:00 AM).
-- **Protected Endpoints**: API key dependency verification to secure administrative and trigger endpoints.
+- **Task Management**: RESTful endpoints to create, list, update, and delete personal tasks stored in a local SQLite database.
+- **Weather Service**: Fetches coordinates and daily forecast metrics (temperatures, precipitation chance, weather codes) via Open-Meteo.
+- **Daily Scripture Service**: Retrieves scripture verses dynamically using the Bible API.
+- **Morning Digest Engine**: Assembles pending to-dos, weather forecasts, and daily scripture into a clean, responsive HTML email template using Jinja2.
+- **Email Delivery Service**: Configurable SMTP client with support for STARTTLS and SSL.
+- **Cron Automation**: Python entrypoint designed to run via scheduled cron jobs (e.g., every morning at 7:00 AM).
+- **Protected Endpoints**: API key authentication (`X-API-Key`) to secure task management endpoints.
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 Dagur/
@@ -24,16 +25,20 @@ Dagur/
 │   ├── main.py              # Application entrypoint & router registrations
 │   ├── database.py          # SQLAlchemy engine, session maker, & base model
 │   ├── dependencies.py      # Dependency injections (DB session, API key auth)
-│   ├── models.py            # Database tables and Pydantic schemas (DTOs)
-│   ├── schemas.py            
+│   ├── models.py            # SQLAlchemy ORM models
+│   ├── schemas.py           # Pydantic schemas (DTOs & validation)
 │   ├── routers/
 │   │   ├── __init__.py
-│   │   └── tasks.py         # Task CRUD endpoints (add, list, complete, delete)
+│   │   ├── tasks.py         # Task CRUD endpoints
+│   │   └── external.py      # Weather and scripture preview endpoints
 │   ├── services/
 │   │   ├── __init__.py
-│   │   ├── weather.py       # Weather data scraping / API client
-│   │   ├── email.py         # SMTP email sender (smtplib / email.message)
-│   │   └── digest.py        # Compiles weather + tasks into formatted email body
+│   │   ├── weather.py       # Open-Meteo weather service
+│   │   ├── scripture.py     # Bible API scripture service
+│   │   ├── email.py         # SMTP email delivery service
+│   │   └── digest.py        # Compiles tasks, weather, & scripture into HTML
+│   ├── templates/
+│   │   └── digest.html      # Jinja2 HTML email digest template
 │   └── jobs/
 │       ├── __init__.py
 │       └── send_digest.py   # CLI / Cron entrypoint to trigger daily digest
@@ -51,9 +56,10 @@ Dagur/
 
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
 - **Server**: [Uvicorn](https://www.uvicorn.org/)
-- **Database**: [SQLite](https://www.sqlite.org/) with [SQLAlchemy](https://www.sqlalchemy.org/)
+- **Database**: [SQLite](https://www.sqlite.org/) with [SQLAlchemy 2.0](https://www.sqlalchemy.org/)
 - **Validation**: [Pydantic v2](https://docs.pydantic.dev/)
-- **HTTP & Scraping**: [HTTPX](https://www.python-httpx.org/) & [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/)
+- **Templating**: [Jinja2](https://jinja.palletsprojects.com/)
+- **HTTP Client**: [HTTPX](https://www.python-httpx.org/)
 - **Testing**: [pytest](https://docs.pytest.org/)
 
 ---
@@ -66,7 +72,7 @@ Dagur/
 
 ### 2. Environment Setup
 
-Clone the repository and create a virtual environment:
+Clone the repository and set up a virtual environment:
 
 ```bash
 # Using uv:
@@ -74,7 +80,7 @@ uv venv
 .venv\Scripts\activate      # Windows
 # source .venv/bin/activate # macOS/Linux
 
-# Using python venv:
+# Using standard python venv:
 python -m venv .venv
 .venv\Scripts\activate      # Windows
 # source .venv/bin/activate # macOS/Linux
@@ -83,11 +89,11 @@ python -m venv .venv
 Install dependencies:
 
 ```bash
-# Using pip:
-pip install -r requirements.txt
-
-# Or using uv:
+# Using uv:
 uv sync
+
+# Or using pip:
+pip install -r requirements.txt
 ```
 
 ### 3. Configure Environment Variables
@@ -98,17 +104,22 @@ Copy `.env.example` to `.env` and fill in your settings:
 cp .env.example .env
 ```
 
-Ensure you configure:
-- `API_SECRET_KEY`: Secret token for securing endpoints.
-- `DATABASE_URL`: Defaults to `sqlite:///./dagur.db`.
-- `WEATHER_CITY`: Target city for weather forecast.
-- `SMTP_*` & `EMAIL_*`: Credentials for your email provider (e.g. Gmail App Password).
+Key environment variables:
+- `API_SECRET_KEY`: Secret key required in the `X-API-Key` header for task endpoints.
+- `DATABASE_URL`: SQLite connection string (defaults to `sqlite:///./dagur.db`).
+- `WEATHER_CITY`: Target city for daily weather forecast (e.g. `London`, `Berlin`).
+- `SMTP_HOST`: SMTP server host (e.g. `smtp.gmail.com`).
+- `SMTP_PORT`: SMTP port (`587` for STARTTLS, `465` for SSL).
+- `SMTP_USER`: Email account username / address.
+- `SMTP_PASSWORD`: Email password or Gmail App Password.
+- `EMAIL_FROM`: Sender address.
+- `EMAIL_TO`: Recipient address for the morning digest.
 
 ---
 
-## 🏃 Running the Application
+## Running the Application
 
-Start the local development server:
+### Start the API Server
 
 ```bash
 # Using FastAPI CLI:
@@ -118,51 +129,53 @@ fastapi dev app/main.py
 uvicorn app.main:app --reload
 ```
 
-Once running, explore the interactive documentation:
+Interactive API documentation:
 - **Swagger UI**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - **ReDoc**: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 
 ---
 
-## API Endpoints (Planned)
+## API Endpoints
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
 | `GET` | `/health` | Health check endpoint | No |
-| `GET` | `/tasks` | List all pending / completed tasks | Optional / Yes |
-| `POST` | `/tasks` | Create a new task | Optional / Yes |
-| `PATCH`| `/tasks/{task_id}` | Update task status or details | Optional / Yes |
-| `DELETE`| `/tasks/{task_id}` | Delete a task | Optional / Yes |
-| `GET` | `/weather` | View current weather summary | No |
-| `POST` | `/digest/send` | Manually trigger the morning digest email | Yes (`X-API-Key`) |
+| `GET` | `/tasks` | List all tasks | Yes (`X-API-Key`) |
+| `POST` | `/tasks` | Create a new task | Yes (`X-API-Key`) |
+| `PATCH` | `/tasks/{id}` | Update task details or completion status | Yes (`X-API-Key`) |
+| `DELETE` | `/tasks/{id}` | Delete a task | Yes (`X-API-Key`) |
+| `GET` | `/external/weather` | Fetch weather summary for a city | No |
+| `GET` | `/external/random-scripture` | Fetch a daily or random scripture verse | No |
 
 ---
 
-## Cron Job Setup
+## Running the Morning Digest Job
 
-To run the morning digest automatically every day at 7:00 AM on your deployed server:
+To execute the digest generation and dispatch the email immediately:
+
+```bash
+# Run as a Python module from project root
+uv run python -m app.jobs.send_digest
+# or
+python -m app.jobs.send_digest
+```
+
+### Cron Job Scheduling (Linux / Server)
+
+To automate the delivery every morning at 7:00 AM:
 
 ```bash
 # Open crontab editor
 crontab -e
 
-# Run via python job script at 07:00 every day
+# Run every day at 07:00
 0 7 * * * cd /path/to/Dagur && /path/to/Dagur/.venv/bin/python -m app.jobs.send_digest >> /var/log/dagur.log 2>&1
-
-# OR trigger via curl to your protected endpoint
-0 7 * * * curl -X POST https://your-domain.com/digest/send -H "X-API-Key: your_secret_api_key_here"
 ```
 
 ---
 
-## Running Tests
+## Running Tests (Planned)
 
 ```bash
 pytest
 ```
-
----
-
-### Notes
-- Recommended build sequence: 1) Database & Models (`database.py`, `models.py`), 2) Task CRUD endpoints (`dependencies.py`, `routers/tasks.py`, `main.py`), 3) Individual Services (`weather.py`, `scripture.py`, `email.py`), 4) Digest Aggregator (`digest.py`), 5) Cron trigger script (`jobs/send_digest.py`), 6) Automated testing (`tests/`).
-- Scripture service recommendation: Consider using a public Bible API (such as Bible-API.com or labs.bible.org) with `httpx` or a local list of verses/plans to retrieve a verse and reference of the day.

@@ -35,7 +35,7 @@ async def get_weather_summary(city: str):
         daily = weather_res.json()["daily"]
 
         rain_chance = daily["precipitation_probability_max"][0]
-        rain_chance = rain_chance if not None else 0
+        rain_chance = rain_chance if rain_chance is not None else 0
 
         return {
             "city": f"{location['name']}, {location.get('country', '')}",
