@@ -1,10 +1,10 @@
-# Dagur ☀️
+# Dagur
 
 **Dagur** (Old Norse / Icelandic for *"Day"*) is a personal morning briefing and task management API built with **FastAPI** and **SQLite**. It aggregates your pending tasks, scrapes or fetches current weather forecasts, and delivers a curated morning digest email right to your inbox at 7:00 AM.
 
 ---
 
-## 🚀 Features
+## Features
 
 - **Task Management**: RESTful endpoints to create, list, complete, and delete personal tasks stored in a local SQLite database.
 - **Weather Fetcher / Scraper**: Service to gather current temperatures, conditions, and daily forecasts.
@@ -47,7 +47,7 @@ Dagur/
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/)
 - **Server**: [Uvicorn](https://www.uvicorn.org/)
@@ -58,7 +58,7 @@ Dagur/
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 - Python 3.10+ (Recommended: Python 3.13+)
@@ -124,7 +124,7 @@ Once running, explore the interactive documentation:
 
 ---
 
-## 📡 API Endpoints (Planned)
+## API Endpoints (Planned)
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
@@ -138,7 +138,7 @@ Once running, explore the interactive documentation:
 
 ---
 
-## ⏰ Cron Job Setup
+## Cron Job Setup
 
 To run the morning digest automatically every day at 7:00 AM on your deployed server:
 
@@ -155,7 +155,7 @@ crontab -e
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 ```bash
 pytest
