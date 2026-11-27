@@ -67,7 +67,7 @@ Dagur/
 ## Getting Started
 
 ### 1. Prerequisites
-- Python 3.10+ (Recommended: Python 3.13+)
+- Python 3.13+ 
 - `uv` (recommended) or standard `pip` / `venv`
 
 ### 2. Environment Setup
@@ -174,7 +174,7 @@ crontab -e
 
 ---
 
-## Running Tests (Planned)
+## Running Tests
 
 ```bash
 pytest
