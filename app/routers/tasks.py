@@ -15,6 +15,13 @@ router = APIRouter(
 @router.get("/", response_model=list[TaskPublic])
 def read_tasks(session: SessionDep):
     tasks_db = session.query(Task).all()
+
+    return tasks_db
+@router.get("/{task_id}", response_model=TaskPublic)
+def get_task(task_id: int, session: SessionDep):
+    tasks_db = session.get(Task, task_id)
+    if tasks_db is None:
+        raise HTTPException(status_code=404, detail="Task not found")
     return tasks_db
 
 @router.post("/", response_model=TaskPublic, status_code=status.HTTP_201_CREATED)
