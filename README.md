@@ -25,6 +25,7 @@ Dagur/
 │   ├── database.py          # SQLAlchemy engine, session maker, & base model
 │   ├── dependencies.py      # Dependency injections (DB session, API key auth)
 │   ├── models.py            # Database tables and Pydantic schemas (DTOs)
+│   ├── schemas.py            
 │   ├── routers/
 │   │   ├── __init__.py
 │   │   └── tasks.py         # Task CRUD endpoints (add, list, complete, delete)
@@ -162,12 +163,6 @@ pytest
 
 ---
 
-## 💡 Recommended Ideas for Digest Content
-
-Looking to make your daily email briefing even more useful? Check out these ideas to integrate into `app/services/digest.py`:
-- 📰 **Tech / News Headlines**: Fetch top stories from Hacker News, Reddit, or RSS feeds.
-- 💬 **Quote / Word of the Day**: A motivational quote or a new vocabulary word.
-- 📅 **Calendar Events**: Integrate Google Calendar / Outlook to list today's meetings.
-- 📈 **Market / Crypto Snapshot**: Summary of your favorite stocks or crypto assets.
-- 🐙 **GitHub Streak / Activity**: Check if you have committed code today or open PR notifications.
-- 🎯 **Daily Focus & Habits**: Habit tracker check-in reminders.
+### Notes
+- Recommended build sequence: 1) Database & Models (`database.py`, `models.py`), 2) Task CRUD endpoints (`dependencies.py`, `routers/tasks.py`, `main.py`), 3) Individual Services (`weather.py`, `scripture.py`, `email.py`), 4) Digest Aggregator (`digest.py`), 5) Cron trigger script (`jobs/send_digest.py`), 6) Automated testing (`tests/`).
+- Scripture service recommendation: Consider using a public Bible API (such as Bible-API.com or labs.bible.org) with `httpx` or a local list of verses/plans to retrieve a verse and reference of the day.
