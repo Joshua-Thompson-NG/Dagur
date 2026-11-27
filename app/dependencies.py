@@ -37,4 +37,4 @@ def verify_api_key(incoming_key: str = Security(api_key_header)) -> str:
 
 
 SessionDep = Annotated[Session, Depends(get_db)]
-VerifyAPIKey = Annotated[Security, Depends(verify_api_key)]
+VerifyAPIKey = Annotated[str, Depends(verify_api_key)]

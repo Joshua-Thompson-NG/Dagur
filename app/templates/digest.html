@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="margin:0; padding:0; background:#f4f4f7; font-family:Arial,Helvetica,sans-serif; color:#222;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px; background:#ffffff; border-radius:10px;">
+
+  <!-- Header -->
+  <tr><td style="padding:24px; background:#1f2a44; color:#ffffff; border-radius:10px 10px 0 0;">
+    <div style="font-size:22px; font-weight:bold;">Good morning</div>
+    <div style="font-size:14px; color:#c9d1e6;">{{ date_label }}</div>
+  </td></tr>
+
+  <!-- Weather -->
+  <tr><td style="padding:20px 24px 0;">
+    <h2 style="font-size:16px; margin:0 0 8px;">Weather</h2>
+    {% if weather %}
+      <div>{{ weather.city }}</div>
+      <div style="font-size:24px; font-weight:bold;">{{ weather.temp_max_c|round|int }}° / {{ weather.temp_min_c|round|int }}°C</div>
+      <div style="color:#555;">
+        {{ weather.rain_chance_percent }}% chance of rain.
+        {% if weather.will_it_rain %}Take an umbrella.{% endif %}
+      </div>
+    {% else %}
+      <div style="color:#777;">Weather unavailable today.</div>
+    {% endif %}
+  </td></tr>
+
+  <!-- Tasks -->
+  <tr><td style="padding:20px 24px 0;">
+    <h2 style="font-size:16px; margin:0 0 8px;">Today's tasks</h2>
+    {% set colors = {"high": "#d64545", "normal": "#3b6fd8", "low": "#8a8f99"} %}
+    {% for task in tasks %}
+      {% set level = task.priority.value|lower %}
+      <div style="border-left:4px solid {{ colors.get(level, '#3b6fd8') }}; background:#f8f9fb; padding:10px 12px; margin-bottom:8px;">
+        <div style="font-weight:bold;">{{ task.title }}</div>
+        {% if task.description %}
+          <div style="font-size:14px; color:#555;">{{ task.description }}</div>
+        {% endif %}
+        <div style="font-size:12px; color:#777;">
+          {{ level|capitalize }} priority
+          {% if task.due_date and (task.due_date.hour or task.due_date.minute) %}
+            · {{ task.due_date.strftime("%H:%M") }}
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div style="color:#777;">Nothing scheduled. Enjoy your day.</div>
+    {% endfor %}
+  </td></tr>
+
+  <!-- Scripture -->
+  <tr><td style="padding:20px 24px 24px;">
+    {% if scripture %}
+      <div style="border-top:1px solid #e5e7eb; padding-top:16px; text-align:center;">
+        <div style="font-family:Georgia,serif; font-style:italic; font-size:16px;">“{{ scripture.text }}”</div>
+        <div style="font-size:13px; color:#777; margin-top:6px;">{{ scripture.reference }} · {{ scripture.translation }}</div>
+      </div>
+    {% endif %}
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

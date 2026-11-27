@@ -194,6 +194,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "fastapi", extra = ["standard"] },
+    { name = "httpx" },
     { name = "python-dotenv" },
     { name = "sqlalchemy" },
 ]
@@ -207,6 +208,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.165.0" },
+    { name = "httpx", specifier = ">=0.29.0" },
     { name = "python-dotenv", specifier = ">=1.2.4" },
     { name = "sqlalchemy", specifier = ">=2.1.9" },
 ]

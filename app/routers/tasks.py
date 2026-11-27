@@ -2,14 +2,14 @@ from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.dependencies import SessionDep, VerifyAPIKey
+from app.dependencies import SessionDep, verify_api_key
 from app.models import Task
 from app.schemas import TaskCreate, TaskPublic, TaskUpdate
 
 router = APIRouter(
     prefix="/tasks",
     tags=["tasks"],
-    dependencies=[Depends(VerifyAPIKey)],
+    dependencies=[Depends(verify_api_key)],
 )
 
 @router.get("/", response_model=list[TaskPublic])
